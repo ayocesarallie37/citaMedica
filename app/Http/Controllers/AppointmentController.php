@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Interfaces\HorarioServiceInterface;
 use App\Models\Appointment;
+use App\Models\CancelledAppointment;
 use App\Models\Specialty;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -12,8 +13,48 @@ use Illuminate\Support\Facades\Validator;
 class AppointmentController extends Controller
 {
     public function index(){
-        $appointments = Appointment::all();
-        return view('appointments.index', compact('appointments'));
+        $role = auth()->user()->role;
+
+        if($role == 'admin'){
+            // Admin
+            $confirmedAppointments = Appointment::all()
+                ->where('status', 'Confirmada');
+        
+            $pendingAppointments = Appointment::all()
+                ->where('status', 'Reservada');
+        
+            $oldAppointments = Appointment::all()
+                ->whereIn('status', ['Atendida', 'Cancelada']);
+        }elseif($role == 'doctor'){
+            // Doctores
+            $confirmedAppointments = Appointment::all()
+                ->where('status', 'Confirmada')
+                ->where('doctor_id', auth()->id());
+        
+            $pendingAppointments = Appointment::all()
+                ->where('status', 'Reservada')
+                ->where('doctor_id', auth()->id());
+        
+            $oldAppointments = Appointment::all()
+                ->whereIn('status', ['Atendida', 'Cancelada'])
+                ->where('doctor_id', auth()->id());
+        } elseif($role == 'paciente'){
+            // Pacientes
+            $confirmedAppointments = Appointment::all()
+                ->where('status', 'Confirmada')
+                ->where('patient_id', auth()->id());
+        
+            $pendingAppointments = Appointment::all()
+                ->where('status', 'Reservada')
+                ->where('patient_id', auth()->id());
+        
+            $oldAppointments = Appointment::all()
+                ->whereIn('status', ['Atendida', 'Cancelada'])
+                ->where('patient_id', auth()->id());
+        }
+        // $appointments = Appointment::all();
+
+        return view('appointments.index', compact(/*'appointments' */'confirmedAppointments', 'pendingAppointments', 'oldAppointments', 'role'));
     }
 
     public function create(HorarioServiceInterface $horarioServiceInterface){
@@ -102,6 +143,45 @@ class AppointmentController extends Controller
         Appointment::create($data);
 
         $notification = 'La cita se ha realizado correctamente';
-        return back()->with(compact('notification'));
+        return redirect('/miscitas')->with(compact('notification'));
+    }
+
+    public function cancel(Appointment $appointment, Request $request){
+        if($request->has('justification')){
+            $cancellation = new CancelledAppointment();
+            $cancellation->justification = $request->input('justification');
+            $cancellation->cancelled_by_id = auth()->id();
+
+            $appointment->cancellation()->save($cancellation);
+        }
+        $appointment->status = 'Cancelada';
+        $appointment->save();
+        $notification = 'La cita se ha cancelado correctamente';
+
+        // return back()->with(compact('notification'));
+        return redirect('/miscitas')->with(compact('notification'));
+    }
+
+    public function confirm(Appointment $appointment){
+        $appointment->status = 'Confirmada';
+        $appointment->save();
+        $notification = 'La cita se ha confirmado correctamente';
+
+        // return back()->with(compact('notification'));
+        return redirect('/miscitas')->with(compact('notification'));
+    }
+
+    public function formCancel(Appointment $appointment){
+        if($appointment->status == 'Confirmada'){
+            $role = auth()->user()->role;
+            return view('appointments.cancel', compact('appointment', 'role'));
+        }
+        // return view('appointments.cancel', compact('appointment'));
+        return redirect('/miscitas');
+    }
+
+    public function show(Appointment $appointment){
+        $role = auth()->user()->role;
+        return view('appointments.show', compact('appointment', 'role'));
     }
 }
