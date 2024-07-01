@@ -10,7 +10,7 @@ class SpecialtyController extends Controller
 {
     public function doctors(Specialty $specialty){
         return $specialty->users()->get([
-            'user_id',
+            'users.id',
             'users.name'
         ]);
     } 

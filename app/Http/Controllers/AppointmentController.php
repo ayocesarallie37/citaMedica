@@ -134,13 +134,13 @@ class AppointmentController extends Controller
             'doctor_id',
             'specialty_id'
         ]);
-
+        
         $data['patient_id'] = auth()->id();
-
+        
         $carbonTime = Carbon::createFromFormat('g:i A', $data['scheduled_time']);
         $data['scheduled_time'] = $carbonTime->format('H:i:s');
-
-        Appointment::create($data);
+        
+        Appointment::create($data);        
 
         $notification = 'La cita se ha realizado correctamente';
         return redirect('/miscitas')->with(compact('notification'));

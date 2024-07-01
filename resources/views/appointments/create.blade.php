@@ -61,9 +61,13 @@ use Illuminate\Support\Str;
                     <div class="input-group-prepend">
                         <span class="input-group-text"><i class="ni ni-calendar-grid-58"></i></span>
                     </div>
-                    <input class="form-control datepicker" id="date" name="scheduled_date" placeholder="Seleccionar fecha" type="date"
-                        value="{{ old('scheduled_date') ? old('scheduled_date') : date('Y-m-d') }}" data-date-format="yyyy-mm-dd"
-                        data-date-start-date="{{ date('Y-m-d') }}" data-date-end-date="+30d">
+                    <input class="form-control datepicker" 
+                    id="date" name="scheduled_date" 
+                    placeholder="Seleccionar fecha" 
+                    type="text" value="{{ old('scheduled_date') ? old('scheduled_date') : date('Y-m-d') }}" 
+                    data-date-format="yyyy-mm-dd"
+                    data-date-start-date="{{ date('Y-m-d') }}" 
+                    data-date-end-date="+30d">
                 </div>
             </div>
 
@@ -139,6 +143,5 @@ use Illuminate\Support\Str;
 
 @section('scripts')
 <script src="{{ asset('js/plugins/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js') }}"></script>
-<script src="{{ asset('/js/appointments/create.js') }}">
-</script>
+<script src="{{ asset('/js/appointments/create.js') }}"></script>
 @endsection
