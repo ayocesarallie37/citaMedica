@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     // Aquí puedo retornar la página principal y ponerle la página web. Le ponemos la dirección de la view de la página.
-    return view('/');
+    return view('auth.login');
 });
 
 Auth::routes();
